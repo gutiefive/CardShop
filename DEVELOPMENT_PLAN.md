@@ -20,10 +20,16 @@ The active implementation uses Godot 4.6.3/GDScript. The previous Unity scaffold
 - [x] M4: finite backroom-to-shelf stocking and visible stock
 - [x] M4: customer aisle routes, browsing, reservations, queue and exit
 - [x] M4: checkout cash/sales and 145 combined automated checks
-- [ ] M4: desktop visual/input acceptance and user review
-- [ ] M5: economy, progression and save/load
+- [x] M4: user confirmed finite shelf stocking, customer pickup/queue and register checkout
+- [ ] M4 follow-up: desktop pause/closing/empty-stock edge cases
+- [x] M5: wholesale orders, cash/revenue/expenses and capacity limits
+- [x] M5: sale-based levels and paid backroom upgrade
+- [x] M5: local autosave/manual save, backup recovery, archived reset
+- [x] M5: persistent collection/packs and backroom personal-pack opening
+- [x] M5: 199 combined automated checks pass
+- [ ] M5: desktop ordering/progression/restart acceptance and user review
 - [ ] M6: grading, autographs, parallels and negotiations
 - [ ] M7: fictional seasons and dynamic markets
 - [ ] M8: polish, performance, demo and Steam readiness
 
-The user approved continuing after the M1 desktop smoke test. M4 is authorized and implemented; do not start M5 until M4 has been reviewed and further work authorized. Optional Windows export follows desktop validation; no export templates or build are assumed installed.
+The user approved continuing after the M1 desktop smoke test. M5 is authorized and implemented; do not start M6 until M5 has been reviewed and further work authorized. Optional Windows export follows desktop validation; no export templates or build are assumed installed.

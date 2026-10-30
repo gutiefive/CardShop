@@ -258,7 +258,7 @@ static func make_hud(root: Node) -> ShopHUD:
 	var retail_status := label(screen,"Stock shelves, then open the shop sign",Rect2(100,110,1080,40),18)
 	hud.cash_path = hud.get_path_to(cash)
 	hud.retail_status_path = hud.get_path_to(retail_status)
-	label(screen,"WASD · Move   Shift · Sprint   E · Interact   C · Collection   Esc · Pause",Rect2(90,675,1100,35),18)
+	label(screen,"WASD · Move   Shift · Sprint   E · Interact   C · Collection   B · Office   Esc · Pause",Rect2(90,675,1100,35),18)
 	var notice := label(screen,"",Rect2(140,65,1000,50))
 	var inspection := panel(screen,"Inspection")
 	inspection.position.y = 85
@@ -298,6 +298,11 @@ static func make_hud(root: Node) -> ShopHUD:
 	collection_button.text = "View collection"
 	collection_button.custom_minimum_size.y = 50
 	menu.add_child(collection_button)
+	var office_button := Button.new()
+	office_button.name = "Office"
+	office_button.text = "Shop office · Orders / Save"
+	office_button.custom_minimum_size.y = 50
+	menu.add_child(office_button)
 	var resume_button := Button.new()
 	resume_button.name = "Resume"
 	resume_button.text = "Resume (Esc)"
@@ -335,6 +340,36 @@ static func make_hud(root: Node) -> ShopHUD:
 	collection_close.text = "Back to shop (Esc)"
 	collection_close.custom_minimum_size.y = 50
 	collection_column.add_child(collection_close)
+	var office := panel(screen,"Office")
+	office.position = Vector2(190,50)
+	office.size = Vector2(900,620)
+	var office_column := VBoxContainer.new()
+	office_column.name = "Content"
+	office.add_child(office_column)
+	var office_text := Label.new()
+	office_text.name = "OfficeSummary"
+	office_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	office_text.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	office_text.add_theme_font_size_override("font_size",20)
+	office_column.add_child(office_text)
+	var office_buttons: Array[Button] = []
+	var titles := ["Order 6 boosters · $12", "Order 1 hobby box · $40", "Expand backroom · $100", "Save shop now", "New shop (confirmation)", "Back to shop (Esc)"]
+	for i in range(titles.size()):
+		var button := Button.new()
+		button.name = "OfficeAction%d" % i
+		button.text = titles[i]
+		button.custom_minimum_size.y = 44
+		office_column.add_child(button)
+		office_buttons.append(button)
+	hud.office_panel_path = hud.get_path_to(office)
+	hud.office_text_path = hud.get_path_to(office_text)
+	hud.office_button_path = hud.get_path_to(office_button)
+	hud.order_pack_path = hud.get_path_to(office_buttons[0])
+	hud.order_box_path = hud.get_path_to(office_buttons[1])
+	hud.upgrade_path = hud.get_path_to(office_buttons[2])
+	hud.save_button_path = hud.get_path_to(office_buttons[3])
+	hud.new_shop_path = hud.get_path_to(office_buttons[4])
+	hud.office_close_path = hud.get_path_to(office_buttons[5])
 	hud.open_button_path = hud.get_path_to(open_button)
 	hud.reveal_panel_path = hud.get_path_to(reveal)
 	hud.reveal_text_path = hud.get_path_to(reveal_text)

@@ -1,6 +1,22 @@
 class_name ShopHUD
 extends CanvasLayer
 
+@export var office_panel_path: NodePath
+@export var office_text_path: NodePath
+@export var office_button_path: NodePath
+@export var order_pack_path: NodePath
+@export var order_box_path: NodePath
+@export var upgrade_path: NodePath
+@export var save_button_path: NodePath
+@export var new_shop_path: NodePath
+@export var office_close_path: NodePath
+@export var save_path: String = "user://shop_save_v1.json"
+@onready var office_panel: PanelContainer = get_node(office_panel_path)
+var save_store: ShopSaveStore
+var save_status: String = "Initializing"
+var persistence_ready: bool = false
+var save_blocked: bool = false
+var reset_confirmation: ConfirmationDialog
 @export var retail_path: NodePath
 @export var cash_path: NodePath
 @export var retail_status_path: NodePath
@@ -40,6 +56,22 @@ var notice_remaining: float = 0.0
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	get_node(office_button_path).pressed.connect(show_office)
+	get_node(order_pack_path).pressed.connect(order_pack_stock)
+	get_node(order_box_path).pressed.connect(order_box_stock)
+	get_node(upgrade_path).pressed.connect(upgrade_backroom)
+	get_node(save_button_path).pressed.connect(save_game)
+	get_node(new_shop_path).pressed.connect(confirm_new_shop)
+	get_node(office_close_path).pressed.connect(close_office)
+	retail.model.changed.connect(_on_economy_changed)
+	reset_confirmation = ConfirmationDialog.new()
+	reset_confirmation.dialog_text = "Start a new shop? Your current save files will be archived locally. Cash, stock and collection will restart."
+	reset_confirmation.confirmed.connect(start_new_shop)
+	add_child(reset_confirmation)
+	office_panel.hide()
+	if persistence_enabled():
+		get_tree().auto_accept_quit = false
+		get_tree().root.close_requested.connect(_on_window_close)
 	get_node(close_button_path).pressed.connect(close_inspection)
 	get_node(resume_button_path).pressed.connect(resume)
 	get_node(open_button_path).pressed.connect(open_starter_pack)
@@ -53,7 +85,7 @@ func _ready() -> void:
 	_sync_mode()
 
 func blocked() -> bool:
-	return inspection.visible or pause_panel.visible or reveal_panel.visible or collection_panel.visible
+	return inspection.visible or pause_panel.visible or reveal_panel.visible or collection_panel.visible or office_panel.visible
 
 func _sync_mode() -> void:
 	get_tree().paused = blocked()
@@ -72,8 +104,9 @@ func inspect_product(product: ProductDefinition) -> void:
 		product_text.text += "\n\nSet: %s · %d cards" % [product.card_set.display_name, product.card_set.expected_card_count]
 	var open_button: Button = get_node(open_button_path)
 	open_button.visible = product.pack_definition != null
-	open_button.disabled = session.starter_packs_remaining <= 0
-	open_button.text = "Open free starter pack (%d left)" % session.starter_packs_remaining
+	var backroom_packs := retail.model.backroom_count(product.stable_id)
+	open_button.disabled = session.starter_packs_remaining <= 0 and backroom_packs <= 0
+	open_button.text = "Open free starter pack (%d left)" % session.starter_packs_remaining if session.starter_packs_remaining > 0 else "Open backroom pack (%d available)" % backroom_packs
 	if not product.pack_definition:
 		product_text.text += "\nHobby box opening is not included yet. Inspect a booster pack to open."
 	inspection.show()
@@ -89,11 +122,16 @@ func resume() -> void:
 	_sync_mode()
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("collection") and not blocked():
+	if event.is_action_pressed("office") and not blocked():
+		show_office()
+		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed("collection") and not blocked():
 		show_collection()
 		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed("pause"):
-		if reveal_panel.visible:
+		if office_panel.visible:
+			close_office()
+		elif reveal_panel.visible:
 			finish_reveal()
 		elif collection_panel.visible:
 			close_collection()
@@ -113,10 +151,18 @@ func open_starter_pack() -> void:
 	var before: Dictionary = {}
 	for card in session.catalog.cards:
 		before[card.stable_id] = session.collection.count(card.stable_id)
-	var ids := session.open_pack(inspected_product)
+	var use_starter := session.starter_packs_remaining > 0
+	if not use_starter and (not inspected_product or retail.model.backroom_count(inspected_product.stable_id) < 1):
+		notify("Order booster stock in the office (B) first.")
+		return
+	var ids := session.open_pack(inspected_product,use_starter)
 	if ids.is_empty():
 		notify("No starter packs available, or pack definition invalid.")
 		return
+	if not use_starter:
+		# No await or other action can intervene between validation/draw and stock debit.
+		retail.model.consume_backroom(inspected_product.stable_id)
+	save_game()
 	revealed_ids = ids
 	reveal_is_new.clear()
 	for id in ids:
@@ -155,7 +201,7 @@ func show_collection() -> void:
 		return
 	pause_panel.hide()
 	collection_panel.show()
-	var text := "COLLECTION · %d / %d unique · %d copies\nStarter packs: %d · Session only (resets on restart)\n\n" % [session.collection.unique_cards(),session.catalog.cards.size(),session.collection.total_copies(),session.starter_packs_remaining]
+	var text := "COLLECTION · %d / %d unique · %d copies\nStarter packs: %d · Local save: %s\n\n" % [session.collection.unique_cards(),session.catalog.cards.size(),session.collection.total_copies(),session.starter_packs_remaining,save_status]
 	for card_set in session.catalog.sets:
 		for card in session.catalog.cards_for_set(card_set.stable_id):
 			var copies := session.collection.count(card.stable_id)
@@ -168,12 +214,113 @@ func close_collection() -> void:
 	collection_panel.hide()
 	_sync_mode()
 
+func persistence_enabled() -> bool:
+	return not ProjectSettings.get_meta("cardshop_disable_persistence",false) and not OS.get_cmdline_user_args().has("--no-save")
+
+func initialize_persistence() -> void:
+	save_store = ShopSaveStore.new(save_path)
+	if not persistence_enabled():
+		save_status = "Disabled for tests"
+		persistence_ready = true
+		return
+	if save_store.exists():
+		if save_store.load_into(retail.model,session):
+			save_status = "Loaded backup" if save_store.loaded_backup else "Loaded"
+			retail.refresh_shelves()
+			if save_store.loaded_backup:
+				notify("Recovered the previous checkpoint from backup.")
+		else:
+			save_blocked = true
+			save_status = save_store.error + "; protected from overwrite"
+			notify("Save could not load. Open office (B) for status or New shop.")
+	else:
+		save_status = "New shop"
+	persistence_ready = true
+	if not save_blocked:
+		save_game()
+
+func save_game() -> bool:
+	if not persistence_enabled():
+		return true
+	if not persistence_ready or save_blocked:
+		return false
+	if save_store.save(retail.model,session):
+		save_status = "Saved"
+	else:
+		save_status = save_store.error
+		notify("Save failed. Check office (B): " + save_status)
+	if office_panel.visible:
+		refresh_office()
+	return save_status == "Saved"
+
+func _on_economy_changed() -> void:
+	if persistence_ready:
+		save_game()
+	if office_panel.visible:
+		refresh_office()
+
+func show_office() -> void:
+	if inspection.visible or reveal_panel.visible or collection_panel.visible:
+		return
+	pause_panel.hide()
+	office_panel.show()
+	refresh_office()
+	get_node(office_close_path).grab_focus()
+	_sync_mode()
+
+func refresh_office() -> void:
+	var model := retail.model
+	var next := model.next_level_sales()
+	var progress := "%d / %d sales toward next level" % [model.sales_count,next] if next else "Maximum shop level reached"
+	get_node(office_text_path).text = "SHOP OFFICE · Level %d: %s\n%s\nCash %s · Revenue %s · Spent %s\nBackroom: %d/%d boosters · %d/%d boxes\nOrders arrive instantly at wholesale cost. Shelf stock is separate.\nLocal save: %s" % [model.level(),model.level_name(),progress,ProductDefinition.format_price(model.cash_cents),ProductDefinition.format_price(model.revenue_cents),ProductDefinition.format_price(model.expenses_cents),model.backroom_count("rookie-series-pack"),model.backroom_capacity("rookie-series-pack"),model.backroom_count("rookie-series-box"),model.backroom_capacity("rookie-series-box"),save_status]
+	get_node(order_pack_path).disabled = not model.can_order_stock("rookie-series-pack",6)
+	get_node(order_box_path).disabled = not model.can_order_stock("rookie-series-box",1)
+	var upgrade: Button = get_node(upgrade_path)
+	upgrade.disabled = not model.can_upgrade_backroom()
+	upgrade.text = "Larger backroom purchased (48 packs / 12 boxes)" if model.backroom_expanded else "Expand backroom · $100 · Requires 5 sales (Level 2)"
+
+func order_pack_stock() -> void:
+	order_stock("rookie-series-pack",6)
+
+func order_box_stock() -> void:
+	order_stock("rookie-series-box",1)
+
+func order_stock(id: String, quantity: int) -> void:
+	var cost := retail.model.order_stock(id,quantity)
+	notify("Delivery added to backroom: " + ProductDefinition.format_price(cost) if cost else "Cannot order: insufficient cash or backroom space")
+	refresh_office()
+
+func upgrade_backroom() -> void:
+	notify("Backroom expanded!" if retail.model.upgrade_backroom() else "Upgrade requires 5 sales, $100 and no previous upgrade")
+	refresh_office()
+
+func close_office() -> void:
+	office_panel.hide()
+	_sync_mode()
+
+func confirm_new_shop() -> void:
+	reset_confirmation.popup_centered()
+
+func start_new_shop() -> void:
+	if not save_store.archive():
+		notify(save_store.error)
+		return
+	persistence_ready = false
+	get_tree().paused = false
+	get_tree().reload_current_scene()
+
+func _on_window_close() -> void:
+	if save_game():
+		get_tree().quit()
+	else:
+		notify("Cannot save before closing. Check office (B) and its save status.")
+
 func notify(message: String) -> void:
 	notice_label.text = message
 	notice_remaining = 3.0
 
 func _process(delta: float) -> void:
-	get_node(cash_path).text = "Cash: %s · Sold: %d" % [ProductDefinition.format_price(retail.model.cash_cents),retail.model.sales_count]
+	get_node(cash_path).text = "Cash: %s · Sold: %d · Lv %d" % [ProductDefinition.format_price(retail.model.cash_cents),retail.model.sales_count,retail.model.level()]
 	get_node(retail_status_path).text = "%s · Customers: %d · Queue: %d · Backroom: %d packs / %d boxes" % ["OPEN" if retail.shop_open else "CLOSED",retail.customers.size(),retail.queue.size(),retail.model.backroom_count("rookie-series-pack"),retail.model.backroom_count("rookie-series-box")]
 	notice_remaining = maxf(0.0, notice_remaining - delta)
 	if notice_remaining == 0.0:

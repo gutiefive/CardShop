@@ -58,5 +58,10 @@ collection={
 "events": [Object(InputEventKey,"physical_keycode":67)]
 }
 
+office={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"physical_keycode":66)]
+}
+
 [editor_plugins]
 enabled=PackedStringArray("res://addons/shop_tools/plugin.cfg")

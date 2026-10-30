@@ -28,6 +28,7 @@ func initialize_shelves() -> void:
 		var registered := model.register_shelf(shelf.shelf_id,shelf.product,shelf.visual_paths.size())
 		assert(registered,"Duplicate or invalid authored retail shelf")
 	refresh_shelves()
+	get_node(hud_path).initialize_persistence()
 
 func set_open(value: bool) -> void:
 	shop_open = value

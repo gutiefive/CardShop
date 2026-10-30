@@ -12,6 +12,7 @@ func check(condition: bool, message: String) -> void:
 		print("PASS: " + message)
 
 func _initialize() -> void:
+	ProjectSettings.set_meta("cardshop_disable_persistence",true)
 	call_deferred("run")
 
 func nodes_of_type(node: Node, type_script: Script) -> Array[Node]:
@@ -42,6 +43,8 @@ func run() -> void:
 	CatalogTests.run(check)
 	PackTests.run(check)
 	RetailTests.run(check)
+	EconomyTests.run(check)
+	EconomyTests.run_files(check)
 	var pack: ProductDefinition = load("res://data/rookie_pack.tres")
 	var box: ProductDefinition = load("res://data/rookie_box.tres")
 	check(pack.validation_errors().is_empty() and box.validation_errors().is_empty(),"Both authored products validate")
@@ -57,7 +60,7 @@ func run() -> void:
 	bad.purchase_cents = 500
 	bad.retail_cents = 400
 	check(not bad.validation_errors().is_empty(),"Retail below cost rejected")
-	for action in ["move_forward","move_back","move_left","move_right","sprint","interact","pause","collection"]:
+	for action in ["move_forward","move_back","move_left","move_right","sprint","interact","pause","collection","office"]:
 		check(InputMap.has_action(action) and not InputMap.action_get_events(action).is_empty(),"Input action bound: " + action)
 	check((InputMap.action_get_events("sprint")[0] as InputEventKey).physical_keycode == KEY_SHIFT,"Sprint uses physical Shift")
 	check((InputMap.action_get_events("pause")[0] as InputEventKey).physical_keycode == KEY_ESCAPE,"Pause uses Escape")
@@ -153,5 +156,6 @@ func run() -> void:
 	shop.queue_free()
 	await process_frame
 	await RetailTests.run_scene(self,check)
+	await EconomyTests.run_scene(self,check)
 	print("RESULT: %d checks, %d failures" % [checks,failures])
 	quit(1 if failures else 0)

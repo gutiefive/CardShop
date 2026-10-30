@@ -92,13 +92,17 @@ static func run_ui(hud: ShopHUD, check: Callable) -> void:
 	hud.open_starter_pack()
 	hud.finish_reveal()
 	hud.inspect_product(product)
-	check.call(hud.get_node(hud.open_button_path).disabled and hud.session.collection.total_copies() == 9,"Spent starter inventory disables opening")
+	check.call(not hud.get_node(hud.open_button_path).disabled and hud.session.collection.total_copies() == 9,"Spent starter inventory offers backroom opening")
+	var before_stock := hud.retail.model.backroom_count(product.stable_id)
+	hud.open_starter_pack()
+	check.call(hud.session.collection.total_copies() == 12 and hud.session.starter_packs_remaining == 0 and hud.retail.model.backroom_count(product.stable_id) == before_stock-1,"Personal backroom opening consumes one stock unit and grants three cards")
+	hud.finish_reveal()
 	hud.close_inspection()
 	var collection_key := InputEventAction.new()
 	collection_key.action = "collection"
 	collection_key.pressed = true
 	hud._unhandled_input(collection_key)
-	check.call(hud.collection_panel.visible and hud.collection_text.text.contains("Session only"),"C opens collection and discloses session-only state")
+	check.call(hud.collection_panel.visible and hud.collection_text.text.contains("Local save:"),"C opens collection and discloses save state")
 	hud._unhandled_input(escape)
 	check.call(not hud.blocked() and not hud.get_tree().paused,"Escape closes collection and resumes gameplay")
 	# Force a one-card pool to verify new/duplicate presentation within one pack.

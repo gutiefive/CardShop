@@ -1,6 +1,6 @@
 class_name CardCollection
 extends RefCounted
-## Session-owned copy counts, keyed by stable card ID. No authored Resource mutation.
+## Player-owned copy counts, keyed by stable card ID. No authored Resource mutation.
 var _counts: Dictionary = {}
 
 func count(id: String) -> int:
@@ -24,4 +24,24 @@ func add_cards(ids: Array[String], catalog: CardCatalog) -> bool:
 			return false
 	for id in ids:
 		_counts[id] = count(id) + 1
+	return true
+
+func snapshot() -> Dictionary:
+	return _counts.duplicate()
+
+func snapshot_errors(data: Variant, catalog: CardCatalog) -> PackedStringArray:
+	if not data is Dictionary:
+		return PackedStringArray(["Collection must be an object"])
+	var errors := PackedStringArray()
+	for id in data:
+		if not id is String or not catalog.find_card(id) or not SaveValues.whole(data[id],1,1000000):
+			errors.append("Invalid collection ID or count: " + str(id))
+	return errors
+
+func restore_snapshot(data: Dictionary, catalog: CardCatalog) -> bool:
+	if not snapshot_errors(data,catalog).is_empty():
+		return false
+	_counts.clear()
+	for id in data:
+		_counts[id] = int(data[id])
 	return true
