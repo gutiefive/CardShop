@@ -1,6 +1,10 @@
 class_name ShopHUD
 extends CanvasLayer
 
+@export var retail_path: NodePath
+@export var cash_path: NodePath
+@export var retail_status_path: NodePath
+@onready var retail: RetailDirector = get_node(retail_path)
 @export var prompt_path: NodePath
 @export var crosshair_path: NodePath
 @export var notice_path: NodePath
@@ -63,7 +67,7 @@ func set_focus(text: String) -> void:
 
 func inspect_product(product: ProductDefinition) -> void:
 	inspected_product = product
-	product_text.text = "%s\n\n%s\n\nWholesale: %s   Retail: %s\n\nFree starter packs available · no purchasing" % [product.display_name, product.description, ProductDefinition.format_price(product.purchase_cents), ProductDefinition.format_price(product.retail_cents)]
+	product_text.text = "%s\n\n%s\n\nWholesale: %s   Retail: %s\n\nPersonal starter packs are separate from shop stock" % [product.display_name, product.description, ProductDefinition.format_price(product.purchase_cents), ProductDefinition.format_price(product.retail_cents)]
 	if product.card_set:
 		product_text.text += "\n\nSet: %s · %d cards" % [product.card_set.display_name, product.card_set.expected_card_count]
 	var open_button: Button = get_node(open_button_path)
@@ -169,6 +173,8 @@ func notify(message: String) -> void:
 	notice_remaining = 3.0
 
 func _process(delta: float) -> void:
+	get_node(cash_path).text = "Cash: %s · Sold: %d" % [ProductDefinition.format_price(retail.model.cash_cents),retail.model.sales_count]
+	get_node(retail_status_path).text = "%s · Customers: %d · Queue: %d · Backroom: %d packs / %d boxes" % ["OPEN" if retail.shop_open else "CLOSED",retail.customers.size(),retail.queue.size(),retail.model.backroom_count("rookie-series-pack"),retail.model.backroom_count("rookie-series-box")]
 	notice_remaining = maxf(0.0, notice_remaining - delta)
 	if notice_remaining == 0.0:
 		notice_label.text = ""

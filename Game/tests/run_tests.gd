@@ -41,6 +41,7 @@ func frames(count: int) -> void:
 func run() -> void:
 	CatalogTests.run(check)
 	PackTests.run(check)
+	RetailTests.run(check)
 	var pack: ProductDefinition = load("res://data/rookie_pack.tres")
 	var box: ProductDefinition = load("res://data/rookie_box.tres")
 	check(pack.validation_errors().is_empty() and box.validation_errors().is_empty(),"Both authored products validate")
@@ -151,5 +152,6 @@ func run() -> void:
 	PackTests.run_ui(hud,check)
 	shop.queue_free()
 	await process_frame
+	await RetailTests.run_scene(self,check)
 	print("RESULT: %d checks, %d failures" % [checks,failures])
 	quit(1 if failures else 0)

@@ -25,16 +25,43 @@ static func build() -> Node3D:
 	box(root, "PorchFloor", Vector3(0,-0.15,8), Vector3(2.4,0.3,2), wood)
 	box(root, "PorchBoundary", Vector3(0,1.5,9), Vector3(2.4,3,0.2), glass)
 	box(root, "Counter", Vector3(3,0.6,-3.3), Vector3(4,1.2,1), wood)
+	var retail := RetailDirector.new()
+	retail.name = "Retail"
+	root.add_child(retail)
+	var retail_shelves: Array[ShelfStockInteractable] = []
 	for unit in range(3):
 		var x: float = -4.0 + unit*4.0
 		box(root, "ShelfBack", Vector3(x,1.4,-5.8), Vector3(2.5,2.8,0.2), wood)
 		for side in [-1,1]:
 			box(root, "ShelfSide", Vector3(x+side*1.2,1.4,-5.4), Vector3(0.15,2.8,0.9), wood)
+		var definition: ProductDefinition = BOX if unit == 1 else PACK
+		var stock_board := ShelfStockInteractable.new()
+		stock_board.name = "StockShelf%d" % unit
+		stock_board.shelf_id = "shelf-%d" % unit
+		stock_board.product = definition
+		root.add_child(stock_board)
+		stock_board.position = Vector3(x,2.95,-4.85)
+		stock_board.retail_path = stock_board.get_path_to(retail)
+		shape(stock_board,Vector3(2.3,0.4,0.12),blue)
+		var stock_label := Label3D.new()
+		stock_label.name = "StockLabel"
+		stock_label.font_size = 26
+		stock_label.pixel_size = 0.0025
+		stock_label.position.z = 0.07
+		stock_board.add_child(stock_label)
+		stock_board.label_path = stock_board.get_path_to(stock_label)
+		var browse := Marker3D.new()
+		browse.name = "BrowsePoint"
+		stock_board.add_child(browse)
+		browse.position = Vector3(0,-2.95,0.45)
+		stock_board.browse_path = stock_board.get_path_to(browse)
+		retail_shelves.append(stock_board)
 		for level in range(3):
 			var y: float = 0.35 + level*0.8
 			box(root, "Shelf", Vector3(x,y,-5.4), Vector3(2.5,0.12,1), wood)
 			for item in range(3):
-				product(root, PACK if item%2 == 0 else BOX, Vector3(x+(item-1)*0.65,y+0.28,-5.25), blue if item%2 == 0 else red)
+				var visual := product(root, definition, Vector3(x+(item-1)*0.65,y+0.28,-5.25),blue if definition == PACK else red)
+				stock_board.visual_paths.append(stock_board.get_path_to(visual))
 	box(root, "DisplayBase", Vector3(-3,0.45,0), Vector3(3,0.9,1.3), wood)
 	box(root, "DisplayGlass", Vector3(-3,1.25,0), Vector3(3,0.08,1.3), glass)
 	box(root, "DisplayGlassBack", Vector3(-3,1.1,-0.62), Vector3(3,0.4,0.06), glass)
@@ -55,6 +82,35 @@ static func build() -> Node3D:
 	sign.add_child(sign_label)
 	sign_label.position.z = 0.05
 	sign.label_path = sign.get_path_to(sign_label)
+	sign.retail_path = sign.get_path_to(retail)
+	var register := CheckoutInteractable.new()
+	register.name = "Checkout"
+	root.add_child(register)
+	register.position = Vector3(3,1.45,-2.65)
+	register.retail_path = register.get_path_to(retail)
+	shape(register,Vector3(0.8,0.45,0.3),blue)
+	var register_label := Label3D.new()
+	register_label.name = "CheckoutLabel"
+	register_label.position.z = 0.16
+	register_label.font_size = 28
+	register_label.pixel_size = 0.0025
+	register.add_child(register_label)
+	register.label_path = register.get_path_to(register_label)
+	var marker_names := ["Entry","Junction","Aisle","QueueFront"]
+	var positions: Array[Vector3] = [Vector3(0,0,6.2),Vector3(0,0,-1.7),Vector3(0,0,-4.4),Vector3(3,0,-1.7)]
+	var marker_paths: Array[NodePath] = []
+	for i in range(marker_names.size()):
+		var marker := Marker3D.new()
+		marker.name = marker_names[i]
+		root.add_child(marker)
+		marker.position = positions[i]
+		marker_paths.append(retail.get_path_to(marker))
+	retail.entry_path = marker_paths[0]
+	retail.junction_path = marker_paths[1]
+	retail.aisle_path = marker_paths[2]
+	retail.queue_front_path = marker_paths[3]
+	for stock_board in retail_shelves:
+		retail.shelf_paths.append(retail.get_path_to(stock_board))
 	for x in [-4,0,4]:
 		var light := OmniLight3D.new()
 		light.name = "OverheadLight"
@@ -74,6 +130,8 @@ static func build() -> Node3D:
 	environment.environment.ambient_light_energy = 0.5
 	root.add_child(environment)
 	var hud := make_hud(root)
+	hud.retail_path = hud.get_path_to(retail)
+	retail.hud_path = retail.get_path_to(hud)
 	var player := FirstPersonPlayer.new()
 	player.name = "Player"
 	player.collision_layer = 2
@@ -139,7 +197,7 @@ static func shape(body: StaticBody3D, size: Vector3, mat: Material) -> void:
 	collider.shape.size = size
 	body.add_child(collider)
 
-static func product(parent: Node, definition: ProductDefinition, at: Vector3, mat: Material) -> void:
+static func product(parent: Node, definition: ProductDefinition, at: Vector3, mat: Material) -> ProductInteractable:
 	var body := ProductInteractable.new()
 	body.name = "Product"
 	body.product = definition
@@ -153,6 +211,7 @@ static func product(parent: Node, definition: ProductDefinition, at: Vector3, ma
 	label.pixel_size = 0.002
 	body.add_child(label)
 	label.position.z = 0.05 if definition.product_type == ProductDefinition.ProductType.BOOSTER_PACK else 0.21
+	return body
 
 static func label(parent: Node, text: String, rect: Rect2, font_size: int = 22) -> Label:
 	var result := Label.new()
@@ -195,7 +254,10 @@ static func make_hud(root: Node) -> ShopHUD:
 	hud.add_child(screen)
 	var crosshair := label(screen,"+",Rect2(620,340,40,40),28)
 	var prompt := label(screen,"",Rect2(90,605,1100,50))
-	label(screen,"Cash: $500.00 (placeholder)",Rect2(20,15,420,45))
+	var cash := label(screen,"Cash: $500.00",Rect2(20,15,420,45))
+	var retail_status := label(screen,"Stock shelves, then open the shop sign",Rect2(100,110,1080,40),18)
+	hud.cash_path = hud.get_path_to(cash)
+	hud.retail_status_path = hud.get_path_to(retail_status)
 	label(screen,"WASD · Move   Shift · Sprint   E · Interact   C · Collection   Esc · Pause",Rect2(90,675,1100,35),18)
 	var notice := label(screen,"",Rect2(140,65,1000,50))
 	var inspection := panel(screen,"Inspection")
