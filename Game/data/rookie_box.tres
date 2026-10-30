@@ -1,6 +1,8 @@
-[gd_resource type="Resource" script_class="ProductDefinition" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="ProductDefinition" load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/shop/product_definition.gd" id="1"]
+
+[ext_resource type="Resource" path="res://data/cards/sets/rookie_series.tres" id="set"]
 
 [resource]
 script = ExtResource("1")
@@ -10,3 +12,4 @@ description = "A hobby box of fictional Rookie Series baseball packs."
 purchase_cents = 4000
 retail_cents = 6500
 product_type = 1
+card_set = ExtResource("set")

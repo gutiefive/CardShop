@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="BaseballPlayerDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/cards/baseball_player_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+stable_id = "player-owen-bell"
+display_name = "Owen Bell"
+team_name = "Prairie Comets"
+position = 1
+bats = 0
+throws = 1
+biography = "A calm catcher who studies every opposing hitter."

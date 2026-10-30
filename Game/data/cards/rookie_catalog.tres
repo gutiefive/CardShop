@@ -1,0 +1,34 @@
+[gd_resource type="Resource" script_class="CardCatalog" load_steps=26 format=3]
+
+[ext_resource type="Script" path="res://scripts/cards/card_catalog.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/cards/baseball_player_definition.gd" id="ps"]
+[ext_resource type="Script" path="res://scripts/cards/card_set_definition.gd" id="ss"]
+[ext_resource type="Script" path="res://scripts/cards/card_rarity_definition.gd" id="rs"]
+[ext_resource type="Script" path="res://scripts/cards/card_definition.gd" id="cs"]
+[ext_resource type="Resource" path="res://data/cards/players/milo_reyes.tres" id="p0"]
+[ext_resource type="Resource" path="res://data/cards/players/owen_bell.tres" id="p1"]
+[ext_resource type="Resource" path="res://data/cards/players/eli_brooks.tres" id="p2"]
+[ext_resource type="Resource" path="res://data/cards/players/nico_park.tres" id="p3"]
+[ext_resource type="Resource" path="res://data/cards/players/theo_grant.tres" id="p4"]
+[ext_resource type="Resource" path="res://data/cards/players/rafa_sol.tres" id="p5"]
+[ext_resource type="Resource" path="res://data/cards/players/jude_mercer.tres" id="p6"]
+[ext_resource type="Resource" path="res://data/cards/players/asher_vale.tres" id="p7"]
+[ext_resource type="Resource" path="res://data/cards/sets/rookie_series.tres" id="set"]
+[ext_resource type="Resource" path="res://data/cards/rarities/common.tres" id="common"]
+[ext_resource type="Resource" path="res://data/cards/rarities/uncommon.tres" id="uncommon"]
+[ext_resource type="Resource" path="res://data/cards/rarities/rare.tres" id="rare"]
+[ext_resource type="Resource" path="res://data/cards/checklist/rookie_001.tres" id="c1"]
+[ext_resource type="Resource" path="res://data/cards/checklist/rookie_002.tres" id="c2"]
+[ext_resource type="Resource" path="res://data/cards/checklist/rookie_003.tres" id="c3"]
+[ext_resource type="Resource" path="res://data/cards/checklist/rookie_004.tres" id="c4"]
+[ext_resource type="Resource" path="res://data/cards/checklist/rookie_005.tres" id="c5"]
+[ext_resource type="Resource" path="res://data/cards/checklist/rookie_006.tres" id="c6"]
+[ext_resource type="Resource" path="res://data/cards/checklist/rookie_007.tres" id="c7"]
+[ext_resource type="Resource" path="res://data/cards/checklist/rookie_008.tres" id="c8"]
+
+[resource]
+script = ExtResource("1")
+players = Array[ExtResource("ps")]([ExtResource("p0"), ExtResource("p1"), ExtResource("p2"), ExtResource("p3"), ExtResource("p4"), ExtResource("p5"), ExtResource("p6"), ExtResource("p7")])
+sets = Array[ExtResource("ss")]([ExtResource("set")])
+rarities = Array[ExtResource("rs")]([ExtResource("common"), ExtResource("uncommon"), ExtResource("rare")])
+cards = Array[ExtResource("cs")]([ExtResource("c1"), ExtResource("c2"), ExtResource("c3"), ExtResource("c4"), ExtResource("c5"), ExtResource("c6"), ExtResource("c7"), ExtResource("c8")])

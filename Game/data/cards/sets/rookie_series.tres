@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="CardSetDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/cards/card_set_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+stable_id = "set-rookie-2026"
+display_name = "2026 Rookie Series"
+season_year = 2026
+expected_card_count = 8
+description = "Eight rising stars from an original fictional baseball universe."

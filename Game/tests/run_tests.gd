@@ -39,6 +39,7 @@ func frames(count: int) -> void:
 		await physics_frame
 
 func run() -> void:
+	CatalogTests.run(check)
 	var pack: ProductDefinition = load("res://data/rookie_pack.tres")
 	var box: ProductDefinition = load("res://data/rookie_box.tres")
 	check(pack.validation_errors().is_empty() and box.validation_errors().is_empty(),"Both authored products validate")
@@ -109,6 +110,7 @@ func run() -> void:
 	player._unhandled_input(key_event("interact"))
 	check(hud.inspection.visible and paused,"E opens inspection and pauses gameplay")
 	check(hud.product_text.text.contains("$4.00") and hud.product_text.text.contains(pack.display_name),"Inspection shows authored name and retail price")
+	check(hud.product_text.text.contains("2026 Rookie Series") and hud.product_text.text.contains("8 cards"),"Product inspection identifies its card set and checklist size")
 	var frozen := player.position
 	Input.action_press("move_forward")
 	await frames(5)

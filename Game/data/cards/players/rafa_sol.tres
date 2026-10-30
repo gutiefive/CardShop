@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="BaseballPlayerDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/cards/baseball_player_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+stable_id = "player-rafa-sol"
+display_name = "Rafa Sol"
+team_name = "Copper Ridge Owls"
+position = 5
+bats = 0
+throws = 1
+biography = "An energetic shortstop with exceptional range."

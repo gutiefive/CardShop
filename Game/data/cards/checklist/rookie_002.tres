@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="CardDefinition" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/cards/card_definition.gd" id="1"]
+[ext_resource type="Resource" path="res://data/cards/players/owen_bell.tres" id="player"]
+[ext_resource type="Resource" path="res://data/cards/sets/rookie_series.tres" id="set"]
+[ext_resource type="Resource" path="res://data/cards/rarities/common.tres" id="rarity"]
+
+[resource]
+script = ExtResource("1")
+stable_id = "card-rookie-2026-002"
+card_number = 2
+player = ExtResource("player")
+card_set = ExtResource("set")
+rarity = ExtResource("rarity")
+base_value_cents = 50
+flavor_text = "A new chapter begins in the 2026 Rookie Series."

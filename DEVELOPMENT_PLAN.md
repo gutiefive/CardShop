@@ -7,8 +7,11 @@ The active implementation uses Godot 4.6.3/GDScript. The previous Unity scaffold
 - [x] M1: first-person shop, collision, interaction, two products, HUD and pause
 - [x] M1: committed starter scene and repeatable editor/CLI generation
 - [x] M1: 36 automated checks pass
-- [ ] M1: desktop visual/input acceptance and user review
-- [ ] M2: fictional baseball player/set/card database
+- [x] M1: user-reported desktop gameplay smoke test and review
+- [ ] M1 follow-up: desktop editor-menu regeneration (headless regeneration passed)
+- [x] M2: fictional baseball player/set/card database, product set references and validation
+- [x] M2: 59 automated checks across database and M1 gameplay
+- [ ] M2: user review
 - [ ] M3: pack opening and collection management
 - [ ] M4: stocking, customer AI and checkout
 - [ ] M5: economy, progression and save/load
@@ -16,4 +19,4 @@ The active implementation uses Godot 4.6.3/GDScript. The previous Unity scaffold
 - [ ] M7: fictional seasons and dynamic markets
 - [ ] M8: polish, performance, demo and Steam readiness
 
-Do not start M2 until M1 has been reviewed. Optional Windows export follows desktop validation; no export templates or build are assumed installed.
+The user approved continuing after the M1 desktop smoke test. Do not start M3 until M2 has been reviewed. Optional Windows export follows desktop validation; no export templates or build are assumed installed.

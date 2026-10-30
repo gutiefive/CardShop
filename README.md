@@ -38,21 +38,23 @@ godot --headless --path Game --script tools/generate_shop.gd
 
 Cloud sandbox only: set `XDG_CONFIG_HOME=/tmp/cardshop-godot/config`, `XDG_DATA_HOME=/tmp/cardshop-godot/data`, and `XDG_CACHE_HOME=/tmp/cardshop-godot/cache`, creating those directories first. Godot editor import also opens a local debug socket, which may need the execution tool's supported sandbox escalation. Normal desktop use needs no such override.
 
-**Validated here on Godot 4.6.3:** editor import, scene generation, main-scene headless startup and **36 automated checks, zero failures**. Tests exercise authored product validation, integer-cent price formatting, input bindings, repeated hierarchy generation, packed reference wiring, actual CharacterBody floor/movement/sprint/wall collision, camera ray focus/range/occlusion, E inspection, pause blocking physics, Close/Resume signal wiring, sign toggle and look calculations.
+**Validated here on Godot 4.6.3:** editor import, scene generation, main-scene headless startup and **59 automated checks, zero failures**. Tests exercise authored product validation, integer-cent price formatting, input bindings, repeated hierarchy generation, packed reference wiring, actual CharacterBody floor/movement/sprint/wall collision, camera ray focus/range/occlusion, E inspection, pause blocking physics, Close/Resume signal wiring, sign toggle and look calculations.
 
-These are engine-backed headless tests. Button signals and input handlers are invoked programmatically; physical clicks, mouse capture and visual rendering have not been checked. No Windows export was built. M1 is awaiting desktop acceptance, not declared complete.
+These are engine-backed headless tests. Button signals and input handlers are invoked programmatically; physical clicks, mouse capture and visual rendering have not been checked. No Windows export was built. The user subsequently reported the desktop gameplay smoke test passed and authorized M2. Desktop editor-menu regeneration and Windows export remain unverified.
 
-## Desktop acceptance (pending)
+## Desktop acceptance record
 
-- [ ] Open project without script errors and run F5
+User-reported smoke checks are marked below. Detailed edge cases and export remain follow-up checks.
+
+- [x] User opened the project and ran the desktop gameplay smoke test
 - [ ] Verify lighting, materials, readable labels, glass and HUD at desktop resolution
 - [ ] WASD, diagonal movement, sprint, physical mouse-look/capture and pitch limit
 - [ ] Floor/wall/furniture/porch collision; no escaping the shop
 - [ ] Product focus within range; walls block focus; glass allows inspection
 - [ ] Both products show correct name, description and prices
 - [ ] Physical Close button and Escape dismiss inspection; cursor recaptures
-- [ ] Counter sign toggles visibly and reports state
-- [ ] Pause stops gameplay; physical Resume button and Escape restore it
+- [x] User-reported sign interaction smoke test
+- [x] User-reported pause/resume smoke test
 - [ ] Editor regeneration confirmation/reopening works without duplicates
 - [ ] Optional: Windows export with installed Godot export templates and smoke test
 
@@ -66,4 +68,18 @@ These are engine-backed headless tests. Button signals and input handlers are in
 - `tools/`, `addons/shop_tools/`: shared builder, CLI entry point and editor menu.
 - `tests/`: dependency-free headless test runner.
 
-M0/M1 only. M2 remains gated on review. See DEVELOPMENT_PLAN.md and DEVELOPMENT_LOG.md.
+M2 database is implemented; M3 remains gated on review. See DEVELOPMENT_PLAN.md and DEVELOPMENT_LOG.md.
+
+## M2 fictional card database
+
+`data/cards/rookie_catalog.tres` registers eight fictional players, one 2026 Rookie Series set, three rarities (Common, Uncommon, Rare), and eight numbered cards. Player Resources contain identity, fictional team, position, handedness and biography. Cards reference their player, set and rarity, with a stable ID and an authored base value in cents. These values are placeholders, not a simulated market. There are no pack odds, owned copies, collection, packs to open, or season simulation yet.
+
+In Godot's FileSystem panel, open `data/cards/rookie_catalog.tres` to inspect the registered definitions. Expand a player or card reference to inspect/edit it. Both shop products reference the same set; in-game inspection now shows its name and checklist size. The database is authored data, not a new card browser screen.
+
+To validate and print the full checklist:
+
+```sh
+godot --headless --path Game --script tools/list_catalog.gd
+```
+
+Runtime queries: `CardCatalog.find_card(stable_id)`, `cards_for_set(set_id)` (sorted by printed number), and `cards_for_player(player_id)`. Unknown IDs return null or an empty array. `validation_errors()` rejects missing/null/duplicate definitions, invalid prices/metadata, unregistered references, duplicate printed numbers, out-of-range numbers and incomplete checklists. IDs are globally unique across definition types; do not change shipped IDs when renaming a player or moving an asset. When adding cards, register their Resource and dependencies in the catalog and update the set checklist size. Commit the Resources and run tests before review.

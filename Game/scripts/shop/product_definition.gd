@@ -8,6 +8,7 @@ enum ProductType { BOOSTER_PACK, HOBBY_BOX }
 @export_multiline var description: String = ""
 @export var purchase_cents: int = 0
 @export var retail_cents: int = 0
+@export var card_set: CardSetDefinition
 @export var product_type: ProductType = ProductType.BOOSTER_PACK
 
 func validation_errors() -> PackedStringArray:
@@ -20,6 +21,8 @@ func validation_errors() -> PackedStringArray:
 		errors.append("Prices must be nonnegative; retail must cover purchase")
 	if product_type not in ProductType.values():
 		errors.append("Unknown product type")
+	if card_set:
+		errors.append_array(card_set.validation_errors())
 	return errors
 
 static func format_price(cents: int) -> String:

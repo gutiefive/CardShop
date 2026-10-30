@@ -40,6 +40,8 @@ func set_focus(text: String) -> void:
 
 func inspect_product(product: ProductDefinition) -> void:
 	product_text.text = "%s\n\n%s\n\nWholesale: %s   Retail: %s\n\nInspection only · no purchasing or pack opening" % [product.display_name, product.description, ProductDefinition.format_price(product.purchase_cents), ProductDefinition.format_price(product.retail_cents)]
+	if product.card_set:
+		product_text.text += "\n\nSet: %s · %d cards" % [product.card_set.display_name, product.card_set.expected_card_count]
 	inspection.show()
 	get_node(close_button_path).grab_focus()
 	_sync_mode()
