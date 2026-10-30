@@ -11,12 +11,15 @@ The active implementation uses Godot 4.6.3/GDScript. The previous Unity scaffold
 - [ ] M1 follow-up: desktop editor-menu regeneration (headless regeneration passed)
 - [x] M2: fictional baseball player/set/card database, product set references and validation
 - [x] M2: 59 automated checks across database and M1 gameplay
-- [ ] M2: user review
-- [ ] M3: pack opening and collection management
+- [x] M2: user reviewed updated inspection and authorized M3
+- [x] M3: weighted pack rules, finite free starter packs and card reveals
+- [x] M3: owned copy counts and collection checklist
+- [x] M3: 105 combined automated checks pass
+- [ ] M3: desktop acceptance and user review
 - [ ] M4: stocking, customer AI and checkout
 - [ ] M5: economy, progression and save/load
 - [ ] M6: grading, autographs, parallels and negotiations
 - [ ] M7: fictional seasons and dynamic markets
 - [ ] M8: polish, performance, demo and Steam readiness
 
-The user approved continuing after the M1 desktop smoke test. Do not start M3 until M2 has been reviewed. Optional Windows export follows desktop validation; no export templates or build are assumed installed.
+The user approved continuing after the M1 desktop smoke test. M3 is authorized and implemented; do not start M4 until M3 has been reviewed and further work authorized. Optional Windows export follows desktop validation; no export templates or build are assumed installed.

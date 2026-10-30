@@ -33,3 +33,15 @@ Added typed Resources for fictional baseball players, sets, rarities and cards, 
 Expanded tests for stable lookup, set/player queries, product set association, ID collisions, printed numbers, incomplete checklists, negative values, null/unregistered references and invalid metadata. Test fixtures use Godot's deep resource-graph duplication to preserve shared references without mutating the authored catalog. Final target: 59 combined checks, with real headless M1 regression coverage; results recorded after execution below. Base values are authored placeholders, not dynamic market prices.
 
 Final results on Godot 4.6.3: **59 checks, 0 failures**, exit 0; CLI checklist validator passed with 8 players / 1 set / 3 rarities / 8 cards. Main scene smoke run exited 0 without engine errors. Editor import passed using supported sandbox escalation for the local debug socket. M2 desktop Inspector and updated product inspection require user review; no new desktop test is claimed.
+
+## 2026-10-30 — M3 pack opening and session collection
+
+User showed M2 inspection working on desktop, then explicitly requested continuing to M3 and testing GitHub Desktop fetch afterward.
+
+Implemented Resource-authored pack rules: three independent draws, 70/25/5 Common/Uncommon/Rare weights, uniform selection within rarity, with replacement. Added finite three-pack free starter inventory, atomic collection grants, duplicate copy counts and unique totals. Authored definitions remain unchanged in play. Opening is offered on booster inspection, not hobby boxes. No purchases/cash deductions, stocking, save/load, customers or other M4+ systems added.
+
+Added a sequential rarity-colored reveal panel with player/team, biography, base value and NEW/DUPLICATE state. All cards enter collection once when opening starts; Escape skips presentation without losing or re-awarding cards. Last reveal opens a complete owned/missing checklist; C and pause menu can reopen it. Session-only reset is disclosed in collection and README. Regenerated committed starter scene with explicit serialized UI references.
+
+Validation on Godot 4.6.3: **105 checks, zero failures**, process exit 0. Coverage includes seeded reproducibility, eligible draws, single-rarity duplicates, invalid weights/pools/pack sizes, finite inventory, atomic collection batches, shared Resource immutability, UI button signal wiring, double-open guard, reveal advancement/skipping, collection navigation, duplicate flags within a pack, and prior M1/M2 regression checks. Editor import passed with supported sandbox escalation for Godot's local debug socket. Main scene smoke result recorded below. Desktop physical input, layout and visual appearance of the new M3 UI remain pending; no desktop pass is claimed. User-facing GitHub Desktop fetch/pull and M3 review steps are in README.
+
+Main-scene headless startup smoke: exit 0, no engine errors. M3 awaits the user's desktop review after fetching the update.

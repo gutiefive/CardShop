@@ -8,6 +8,7 @@ enum ProductType { BOOSTER_PACK, HOBBY_BOX }
 @export_multiline var description: String = ""
 @export var purchase_cents: int = 0
 @export var retail_cents: int = 0
+@export var pack_definition: CardPackDefinition
 @export var card_set: CardSetDefinition
 @export var product_type: ProductType = ProductType.BOOSTER_PACK
 

@@ -1,8 +1,10 @@
-[gd_resource type="Resource" script_class="ProductDefinition" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="ProductDefinition" load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://scripts/shop/product_definition.gd" id="1"]
 
 [ext_resource type="Resource" path="res://data/cards/sets/rookie_series.tres" id="set"]
+
+[ext_resource type="Resource" path="res://data/cards/rookie_pack_rules.tres" id="pack"]
 
 [resource]
 script = ExtResource("1")
@@ -13,3 +15,4 @@ purchase_cents = 200
 retail_cents = 400
 product_type = 0
 card_set = ExtResource("set")
+pack_definition = ExtResource("pack")

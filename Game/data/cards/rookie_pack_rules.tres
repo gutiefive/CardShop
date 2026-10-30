@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="CardPackDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/cards/card_pack_definition.gd" id="1"]
+[ext_resource type="Resource" path="res://data/cards/sets/rookie_series.tres" id="set"]
+
+[resource]
+script = ExtResource("1")
+stable_id = "pack-rookie-2026"
+card_set = ExtResource("set")
+cards_per_pack = 3
+rarity_weights = {"rarity-common": 70.0, "rarity-uncommon": 25.0, "rarity-rare": 5.0}

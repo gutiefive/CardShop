@@ -196,9 +196,11 @@ static func make_hud(root: Node) -> ShopHUD:
 	var crosshair := label(screen,"+",Rect2(620,340,40,40),28)
 	var prompt := label(screen,"",Rect2(90,605,1100,50))
 	label(screen,"Cash: $500.00 (placeholder)",Rect2(20,15,420,45))
-	label(screen,"WASD · Move    Shift · Sprint    E · Interact    Esc · Pause",Rect2(90,675,1100,35),18)
+	label(screen,"WASD · Move   Shift · Sprint   E · Interact   C · Collection   Esc · Pause",Rect2(90,675,1100,35),18)
 	var notice := label(screen,"",Rect2(140,65,1000,50))
 	var inspection := panel(screen,"Inspection")
+	inspection.position.y = 85
+	inspection.size.y = 550
 	var column := VBoxContainer.new()
 	column.name = "Content"
 	inspection.add_child(column)
@@ -208,6 +210,11 @@ static func make_hud(root: Node) -> ShopHUD:
 	text.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	text.add_theme_font_size_override("font_size",22)
 	column.add_child(text)
+	var open_button := Button.new()
+	open_button.name = "OpenPack"
+	open_button.text = "Open free starter pack"
+	open_button.custom_minimum_size.y = 44
+	column.add_child(open_button)
 	var close_button := Button.new()
 	close_button.name = "Close"
 	close_button.text = "Close inspection (Esc)"
@@ -224,11 +231,56 @@ static func make_hud(root: Node) -> ShopHUD:
 	heading.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	heading.add_theme_font_size_override("font_size",32)
 	menu.add_child(heading)
+	var collection_button := Button.new()
+	collection_button.name = "Collection"
+	collection_button.text = "View collection"
+	collection_button.custom_minimum_size.y = 50
+	menu.add_child(collection_button)
 	var resume_button := Button.new()
 	resume_button.name = "Resume"
 	resume_button.text = "Resume (Esc)"
 	resume_button.custom_minimum_size.y = 50
 	menu.add_child(resume_button)
+	var reveal := panel(screen,"PackReveal")
+	reveal.position = Vector2(290,85)
+	reveal.size = Vector2(700,550)
+	var reveal_column := VBoxContainer.new()
+	reveal_column.name = "Content"
+	reveal.add_child(reveal_column)
+	var reveal_text := Label.new()
+	reveal_text.name = "CardText"
+	reveal_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	reveal_text.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	reveal_text.add_theme_font_size_override("font_size",21)
+	reveal_column.add_child(reveal_text)
+	var next_button := Button.new()
+	next_button.name = "NextCard"
+	next_button.custom_minimum_size.y = 50
+	reveal_column.add_child(next_button)
+	var collection := panel(screen,"Collection")
+	collection.position = Vector2(200,85)
+	collection.size = Vector2(880,550)
+	var collection_column := VBoxContainer.new()
+	collection_column.name = "Content"
+	collection.add_child(collection_column)
+	var collection_text := Label.new()
+	collection_text.name = "Checklist"
+	collection_text.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	collection_text.add_theme_font_size_override("font_size",20)
+	collection_column.add_child(collection_text)
+	var collection_close := Button.new()
+	collection_close.name = "CloseCollection"
+	collection_close.text = "Back to shop (Esc)"
+	collection_close.custom_minimum_size.y = 50
+	collection_column.add_child(collection_close)
+	hud.open_button_path = hud.get_path_to(open_button)
+	hud.reveal_panel_path = hud.get_path_to(reveal)
+	hud.reveal_text_path = hud.get_path_to(reveal_text)
+	hud.next_button_path = hud.get_path_to(next_button)
+	hud.collection_button_path = hud.get_path_to(collection_button)
+	hud.collection_panel_path = hud.get_path_to(collection)
+	hud.collection_text_path = hud.get_path_to(collection_text)
+	hud.collection_close_path = hud.get_path_to(collection_close)
 	hud.prompt_path = hud.get_path_to(prompt)
 	hud.crosshair_path = hud.get_path_to(crosshair)
 	hud.notice_path = hud.get_path_to(notice)
