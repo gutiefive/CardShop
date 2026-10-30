@@ -1,7 +1,0 @@
-{
-  "name": "CardShopEmpire",
-  "references": [
-    "Unity.InputSystem",
-    "Unity.ugui"
-  ]
-}

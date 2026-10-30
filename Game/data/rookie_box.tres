@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="ProductDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/shop/product_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+stable_id = "rookie-series-box"
+display_name = "Rookie Series Hobby Box"
+description = "A hobby box of fictional Rookie Series baseball packs."
+purchase_cents = 4000
+retail_cents = 6500
+product_type = 1

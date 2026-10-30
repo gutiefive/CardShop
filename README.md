@@ -1,49 +1,69 @@
-# Card Shop Empire
+# Card Shop Empire — Godot
 
-An offline, first-person fictional baseball card shop prototype for Windows PC. Active scope: M0 + M1. No purchasing, pack opening, customers, persistence, or baseball simulation yet.
+An offline, first-person fictional baseball card shop prototype. **Godot 4.6.3 standard edition**, typed GDScript, Compatibility renderer. No external packages, services or credentials required.
 
-## Tooling and current status
+This replaces the Unity scaffold at the user's request. The original Unity source is preserved in Git commit `828924b`; the active project is entirely Godot.
 
-Open `Game/` with **Unity 6000.0.23f1 (Unity 6 LTS)**, with Windows Build Support if making a Windows build. No Unity editor or C# compiler was installed in the cloud machine, so this is a source scaffold with editor generation tooling, not an editor-verified playable build. The editor pin is a selected bootstrap target, not a detected installed editor. Package versions are explicit in `Game/Packages/manifest.json`; Unity must resolve them and produce its package lock on first import. Do not ignore or discard that generated lockfile.
+## Open and play
 
-Required: package resolution, compilation, scene generation, EditMode tests and manual Play Mode acceptance. Optional: Windows standalone build. No credentials, external services, or paid APIs are needed. Initial package resolution needs Unity's package registry (`packages.unity.com`) and its download hosts; this has not been exercised here.
+1. Install Godot 4.6.3 **standard** edition; .NET is not required.
+2. Clone this repository or pull its latest `main`.
+3. In Godot Project Manager, click **Import**, choose `Game/project.godot`, then **Import & Edit**.
+4. Press **F6** with `scenes/starter_shop.tscn` open, or **F5** to run the project. The starter scene is already committed; no generation step is needed to play.
+5. Use **WASD** to move, mouse to look, **Left Shift** to sprint, **E** to interact, and **Escape** to close inspection or toggle pause. Close/Resume buttons also work. Click into the game window if needed for keyboard focus.
 
-## First launch
+Approach the blue pack or red box. The crosshair turns yellow and a prompt shows its name. E displays authored description and wholesale/retail prices. The counter sign is a second interaction: it toggles OPEN/CLOSED. Cash is a fixed $500 placeholder. No actual purchasing or pack opening is implemented.
 
-1. Install the pinned editor through Unity Hub and open `Game/`. Allow package import to finish. Confirm Active Input Handling is **Input System Package (New)**; accept a restart if Unity requests one.
-2. Select **Card Shop Empire > Generate Starter Shop**. This creates `Scenes/StarterShop.unity`, two product ScriptableObjects, materials, a URP renderer/pipeline, a UI EventSystem, and the build scene entry. The generator sets URP and player settings. Generated assets live below `Assets/_CardShopEmpire/`.
-3. Select **Card Shop Empire > Validate Starter Shop**. Resolve any console exceptions before entering Play Mode. The validator checks scene references and product ID uniqueness.
-4. Enter Play Mode. Use WASD, mouse, Left Shift and E. A yellow crosshair and text indicate an interactable in range. Inspect a shelf/display product, close with the button or Escape. Toggle the counter sign to see a different interaction. Escape opens the pause menu; Resume or Escape returns to control. Pause blocks all gameplay controls; no simulation systems exist yet and global time scale is intentionally unchanged.
-5. Run **Window > General > Test Runner > EditMode > Run All**. The generator test replaces the active scene: save other work first. Tests cover invalid/nonfinite product values, stable IDs, input bindings, scene references and regeneration counts/GUID stability.
-6. Generate a second time and verify one player/HUD/shop and no duplicates. Generator-owned content is rebuilt rather than merged. Duplicate or rename the generated scene before hand editing it; sample assets/materials are generator-owned too.
+## Included scene
 
-## Acceptance checklist (not yet run)
+Warm primitive shop with floor, ceiling, walls, entrance/closed porch, counter, three shelf units, a transparent glass-style card case, lights, player and functional HUD. Twenty-nine product instances use two authored Resources: Rookie Series Booster Pack and Rookie Series Hobby Box. Glass blocks player movement but inspection rays can reach products through it. Solid walls and furniture block inspection rays.
 
-- [ ] Pinned editor opens project and resolves packages without errors
-- [ ] Compilation and all EditMode tests pass; record counts
-- [ ] URP materials and lighting render; no missing/pink materials
-- [ ] WASD/mouse/sprint work; pitch clamps; diagonal movement is normalized
-- [ ] Player collides with walls, shelves, counter, floor and display; cannot leave porch
-- [ ] Product prompt only in range and line of sight; inspection shows correct definition
-- [ ] Close button and Escape dismiss inspection and restore cursor capture
-- [ ] Counter sign toggles, with transient confirmation
-- [ ] Pause blocks movement/look/interactions; menu mouse works; resume captures cursor
-- [ ] Regeneration preserves asset GUIDs and produces no duplicate objects
-- [ ] Optional: Windows standalone build and smoke test
+`tools/shop_builder.gd` is the single generation path. In the editor select **Project > Tools > Regenerate Card Shop** (plugin enabled in project settings). Confirm replacement, then reopen the starter scene from disk. Save customized layouts as a separate scene first; regeneration replaces the generated starter scene. It preserves external product Resources and their stable IDs. Repeated generation produces the same layout and hierarchy without accumulating nodes.
 
-## Automated editor commands
+## Checks
 
-Set `UNITY_EDITOR` to your installed editor executable. Run from the repository root, sequentially, with no other editor instance opening Game. Batch use requires an appropriately licensed editor.
+From repository root, with `godot` on PATH (or substitute your Godot executable):
 
 ```sh
-"$UNITY_EDITOR" -batchmode -nographics -quit -projectPath "$PWD/Game" -executeMethod CardShopEmpire.Editor.StarterShopBuilder.Build -logFile /tmp/cardshop-generate.log
-"$UNITY_EDITOR" -batchmode -nographics -projectPath "$PWD/Game" -runTests -testPlatform EditMode -testResults /tmp/cardshop-editmode.xml -logFile /tmp/cardshop-tests.log
+godot --headless --path Game --editor --import --quit
+godot --headless --path Game --script tests/run_tests.gd
+godot --headless --path Game --quit-after 90
 ```
 
-Check process exit status, current logs and XML test counts/failures. Do not add `-quit` to the test command; let the runner finish. These commands are documented but unexecuted in this cloud environment. Preserve generated Unity asset/meta files after a successful run.
+To regenerate from the command line, after initial editor import:
+
+```sh
+godot --headless --path Game --script tools/generate_shop.gd
+```
+
+Cloud sandbox only: set `XDG_CONFIG_HOME=/tmp/cardshop-godot/config`, `XDG_DATA_HOME=/tmp/cardshop-godot/data`, and `XDG_CACHE_HOME=/tmp/cardshop-godot/cache`, creating those directories first. Godot editor import also opens a local debug socket, which may need the execution tool's supported sandbox escalation. Normal desktop use needs no such override.
+
+**Validated here on Godot 4.6.3:** editor import, scene generation, main-scene headless startup and **36 automated checks, zero failures**. Tests exercise authored product validation, integer-cent price formatting, input bindings, repeated hierarchy generation, packed reference wiring, actual CharacterBody floor/movement/sprint/wall collision, camera ray focus/range/occlusion, E inspection, pause blocking physics, Close/Resume signal wiring, sign toggle and look calculations.
+
+These are engine-backed headless tests. Button signals and input handlers are invoked programmatically; physical clicks, mouse capture and visual rendering have not been checked. No Windows export was built. M1 is awaiting desktop acceptance, not declared complete.
+
+## Desktop acceptance (pending)
+
+- [ ] Open project without script errors and run F5
+- [ ] Verify lighting, materials, readable labels, glass and HUD at desktop resolution
+- [ ] WASD, diagonal movement, sprint, physical mouse-look/capture and pitch limit
+- [ ] Floor/wall/furniture/porch collision; no escaping the shop
+- [ ] Product focus within range; walls block focus; glass allows inspection
+- [ ] Both products show correct name, description and prices
+- [ ] Physical Close button and Escape dismiss inspection; cursor recaptures
+- [ ] Counter sign toggles visibly and reports state
+- [ ] Pause stops gameplay; physical Resume button and Escape restore it
+- [ ] Editor regeneration confirmation/reopening works without duplicates
+- [ ] Optional: Windows export with installed Godot export templates and smoke test
 
 ## Architecture
 
-`Scripts/Player` owns Input System actions and CharacterController movement. `Scripts/Interaction` owns `IInteractable`, the shared camera raycast, product inspection and sign toggle. `Scripts/Shop` holds authored product definitions and pure validation rules. `Scripts/UI` displays focus, inspection, notices, pause and placeholder cash. No gameplay wiring depends on scene object names. Product IDs `rookie-series-pack` and `rookie-series-box` are stable; prices are authoring floats for this prototype, not a full economy implementation.
+- `scripts/player/`: CharacterBody3D movement and mouse-look.
+- `scripts/interaction/`: shared Interactable contract, camera ray controller, product and sign behaviors.
+- `scripts/shop/` and `data/`: typed authored product Resources, stable IDs and validation; prices use integer cents.
+- `scripts/ui/`: HUD, inspection, notifications, tree pause and cursor modes.
+- `scenes/`: committed generated starter scene with explicit serialized references.
+- `tools/`, `addons/shop_tools/`: shared builder, CLI entry point and editor menu.
+- `tests/`: dependency-free headless test runner.
 
-The opaque pale blue display top is a glass-style placeholder. Focus feedback uses a yellow crosshair plus prompt, without material mutation. The scene generator uses primitives and replaceable materials. All art and fictional product descriptions are original placeholders. See DEVELOPMENT_PLAN.md and DEVELOPMENT_LOG.md for scope and evidence.
+M0/M1 only. M2 remains gated on review. See DEVELOPMENT_PLAN.md and DEVELOPMENT_LOG.md.

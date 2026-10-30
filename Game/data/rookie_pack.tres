@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="ProductDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/shop/product_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+stable_id = "rookie-series-pack"
+display_name = "Rookie Series Booster Pack"
+description = "A sealed pack featuring fictional neighborhood baseball prospects."
+purchase_cents = 200
+retail_cents = 400
+product_type = 0
