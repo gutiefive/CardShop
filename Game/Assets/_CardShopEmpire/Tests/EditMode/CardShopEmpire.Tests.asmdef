@@ -1,0 +1,14 @@
+{
+  "name": "CardShopEmpire.Tests",
+  "references": [
+    "CardShopEmpire",
+    "CardShopEmpire.Editor",
+    "Unity.InputSystem"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ]
+}

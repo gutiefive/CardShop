@@ -1,0 +1,13 @@
+{
+  "name": "CardShopEmpire.Editor",
+  "references": [
+    "CardShopEmpire",
+    "Unity.RenderPipelines.Universal.Runtime",
+    "Unity.RenderPipelines.Core.Runtime",
+    "Unity.InputSystem",
+    "Unity.ugui"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ]
+}
